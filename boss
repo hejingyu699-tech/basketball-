@@ -13,12 +13,166 @@
   .screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;}
   .screen.on{display:flex;}
   .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 90px;}
-  /* splash */
   #splash{justify-content:center;align-items:center;text-align:center;background:radial-gradient(1200px 600px at 50% -10%,#182342,#0b0f1a);}
   .logo{font-size:34px;font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,#f6d48a,#d9a441);-webkit-background-clip:text;background-clip:text;color:transparent;}
   .sub{color:var(--sub);margin-top:10px;font-size:14px;letter-spacing:4px;}
   .btn{display:inline-block;margin-top:34px;padding:15px 40px;border-radius:14px;background:linear-gradient(180deg,#e7b558,#c78a2a);color:#1a1205;font-weight:800;font-size:17px;border:none;box-shadow:0 8px 24px rgba(217,164,65,.25);}
   .hint{margin-top:16px;color:#5a6278;font-size:12px;}
-  /* header */
-  header{padding:14px 16px 10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:rgba(11,15,26,.9);backdrop-filter:blur(6px);}
-  header .t{font-weight
+  header{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:rgba(11,15,26,.9);backdrop-filter:blur(6px);}
+  header .t{font-weight:800;font-size:16px;}
+  header .s{color:var(--sub);font-size:11px;}
+  .switchbtn{margin-left:auto;font-size:13px;font-weight:700;color:#1a1205;background:linear-gradient(180deg,#e7b558,#c78a2a);border:none;border-radius:10px;padding:9px 14px;white-space:nowrap;}
+  .conf{color:var(--sub);font-size:12px;margin:16px 4px 8px;letter-spacing:1px;}
+  .team{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+  .team .ab{width:40px;height:40px;border-radius:10px;background:#0e1424;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--gold);font-size:13px;}
+  .team .nm{font-weight:700;font-size:15px;}
+  .team .ct{color:var(--sub);font-size:12px;margin-top:2px;}
+  .mk{margin-left:auto;font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:7px;padding:3px 7px;white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;}
+  .card h3{font-size:13px;color:var(--gold);letter-spacing:1px;margin-bottom:10px;}
+  .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;}
+  .row:last-child{border-bottom:none;}
+  .row .k{color:var(--sub);}
+  .risk-h{color:var(--red);font-weight:700;}.risk-m{color:var(--gold);font-weight:700;}.risk-l{color:var(--green);font-weight:700;}
+  .quote{color:var(--sub);font-size:13px;line-height:1.6;font-style:italic;}
+  .placeholder{color:var(--sub);font-size:13px;text-align:center;padding:30px 10px;border:1px dashed var(--line);border-radius:12px;}
+  nav{position:fixed;left:0;right:0;bottom:0;display:none;background:rgba(13,18,32,.95);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);}
+  nav.on{display:flex;}
+  nav button{flex:1;background:none;border:none;color:var(--sub);padding:10px 0 12px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  nav button .i{font-size:19px;}
+  nav button.act{color:var(--gold);}
+  .back{background:none;border:none;color:var(--sub);font-size:22px;}
+</style>
+</head>
+<body>
+
+<div class="screen on" id="splash">
+  <div>
+    <div class="logo">總管王朝</div>
+    <div class="sub">NBA GM · 2010</div>
+    <button class="btn" onclick="buzz();show('select')">進入辦公室</button>
+    <div class="hint">純文字沉浸式模擬 · 單機離線</div>
+  </div>
+</div>
+
+<div class="screen" id="select">
+  <header><div><div class="t">選擇接管球隊</div><div class="s">2010 休賽期 · 30 支球隊</div></div></header>
+  <div class="scroll" id="teamList"></div>
+</div>
+
+<div class="screen" id="dash">
+  <header>
+    <button class="back" onclick="buzz();show('select')">‹</button>
+    <div><div class="t" id="dTeam">—</div><div class="s" id="dSub">—</div></div>
+    <button class="switchbtn" onclick="buzz();show('select')">換隊</button>
+  </header>
+  <div class="scroll" id="dashBody"></div>
+</div>
+
+<nav id="nav">
+  <button data-tab="home" class="act" onclick="buzz();tab('home')"><span class="i">🏠</span>主頁</button>
+  <button data-tab="roster" onclick="buzz();tab('roster')"><span class="i">👥</span>名單</button>
+  <button data-tab="salary" onclick="buzz();tab('salary')"><span class="i">💰</span>薪資</button>
+  <button data-tab="picks" onclick="buzz();tab('picks')"><span class="i">🎟️</span>選秀權</button>
+  <button data-tab="set" onclick="buzz();tab('set')"><span class="i">⚙️</span>設定</button>
+</nav>
+
+<script>
+const TEAMS=[
+["LAL","洛杉磯湖人","Los Angeles","大","西","C","衛冕冠軍，Kobe 與 Gasol 劍指三連霸。"],
+["BOS","波士頓塞爾提克","Boston","大","東","C","綠色三巨頭剛在總決賽飲恨，怒火未消。"],
+["MIA","邁阿密熱火","Miami","中","東","C","The Decision 之後，全城等待一座金盃。"],
+["ORL","奧蘭多魔術","Orlando","中","東","C","Dwight Howard 坐鎮禁區，東區門面。"],
+["DAL","達拉斯獨行俠","Dallas","大","西","C","老將班底成熟，庫班只求一冠。"],
+["PHX","鳳凰城太陽","Phoenix","中","西","P","納什領軍的跑轟大軍，剛打完西決。"],
+["SAS","聖安東尼奧馬刺","San Antonio","中","西","P","GDP 體系依舊穩定，但歲月開始追人。"],
+["DEN","丹佛金塊","Denver","中","西","P","安東尼與比盧普斯的高原主場。"],
+["ATL","亞特蘭大老鷹","Atlanta","中","東","P","陣容均衡，卻總在季後賽差一口氣。"],
+["UTA","猶他爵士","Utah","小","西","P","德隆與布澤爾的擋拆，仍是硬仗。"],
+["POR","波特蘭拓荒者","Portland","中","西","P","天賦滿滿，卻被傷病陰影籠罩。"],
+["MIL","密爾瓦基公鹿","Milwaukee","小","東","P","防守起家的中段班黑馬。"],
+["PHI","費城76人","Philadelphia","大","東","P","Iguodala 領軍，尋找方向。"],
+["OKC","奧克拉荷馬城雷霆","Oklahoma City","小","西","R","杜蘭特與威斯布魯克，青春風暴成形。"],
+["CHI","芝加哥公牛","Chicago","大","東","R","Derrick Rose 正要起飛，風城復甦。"],
+["NYK","紐約尼克","New York","大","東","R","拿下 Stoudemire，麥迪遜花園重新作夢。"],
+["CHA","夏洛特山貓","Charlotte","小","東","R","Jordan 是老闆，年輕陣容待打磨。"],
+["IND","印第安納溜馬","Indiana","小","東","R","Granger 帶隊，慢慢找回競爭力。"],
+["NOH","紐奧良黃蜂","New Orleans","小","西","R","Chris Paul 健康與否，決定一切。"],
+["HOU","休士頓火箭","Houston","大","西","B","姚明傷停，過渡期尋找新核心。"],
+["DET","底特律活塞","Detroit","中","東","B","昔日冠軍班底老去，準備換血。"],
+["MEM","曼菲斯灰熊","Memphis","小","西","B","Young Core 累積中，等待爆發。"],
+["GSW","金州勇士","Golden State","大","西","B","Monta Ellis 與菜鳥 Curry 的混亂期。"],
+["SAC","沙加緬度國王","Sacramento","中","西","B","多年低潮，重建漫漫長路。"],
+["LAC","洛杉磯快艇","Los Angeles","大","西","B","狀元 Blake Griffin 整季報銷後將回歸。"],
+["MIN","明尼蘇達灰狼","Minnesota","小","西","B","累積選秀權，等待轉機。"],
+["NJN","紐澤西籃網","New Jersey","大","東","B","戰績墊底，搬遷布魯克林的傳聞不斷。"],
+["TOR","多倫多暴龍","Toronto","中","東","B","Bosh 離隊後，北境進入重建。"],
+["WAS","華盛頓巫師","Washington","大","東","B","徹底重建，從零開始。"],
+["CLE","克里夫蘭騎士","Cleveland","中","東","B","LeBron 離開後的廢墟，只剩重建。"]
+];
+const TIER={
+ C:{owner:"爭冠狂熱型",goal:"衝擊總冠軍",risk:"高",cls:"risk-h"},
+ P:{owner:"穩健盈利型",goal:"穩定季後賽並突破首輪",risk:"中",cls:"risk-m"},
+ R:{owner:"耐心重建型",goal:"培養核心，力爭季後賽邊緣",risk:"低",cls:"risk-l"},
+ B:{owner:"耐心重建型",goal:"累積天賦與選秀權",risk:"低",cls:"risk-l"}
+};
+function buzz(){ if(navigator.vibrate) navigator.vibrate(8); }
+function $(id){return document.getElementById(id);}
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); $(id).classList.add('on');
+  $('nav').classList.toggle('on', id==='dash'); }
+function renderTeams(){
+  const by={};TEAMS.forEach(t=>{(by[t[4]]=by[t[4]]||[]).push(t);});
+  let h="";
+  [["西","西區"],["東","東區"]].forEach(([c,label])=>{
+    h+=`<div class="conf">${label}</div>`;
+    by[c].forEach(t=>{
+      h+=`<div class="team" onclick="buzz();pick('${t[0]}')">
+        <div class="ab">${t[0]}</div>
+        <div><div class="nm">${t[1]}</div><div class="ct">${t[2]}</div></div>
+        <span class="mk">${t[3]}市場</span></div>`;
+    });
+  });
+  $('teamList').innerHTML=h;
+}
+let cur=null,curTab="home";
+function pick(ab){
+  cur=TEAMS.find(t=>t[0]===ab);
+  localStorage.setItem("gm_team",ab);
+  $('dTeam').textContent=cur[1];
+  $('dSub').textContent=cur[2]+" · "+cur[4]+"區 · "+cur[3]+"市場";
+  tab("home"); show("dash");
+}
+function tab(name){
+  curTab=name;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.dataset.tab===name));
+  const info=TIER[cur[5]], body=$('dashBody');
+  if(name==="home"){
+    body.innerHTML=`
+      <div class="card"><h3>2010 處境</h3><div class="quote">「${cur[6]}」</div></div>
+      <div class="card"><h3>老闆與目標</h3>
+        <div class="row"><span class="k">老闆性格</span><b>${info.owner}</b></div>
+        <div class="row"><span class="k">本季主要目標</span><b>${info.goal}</b></div>
+        <div class="row"><span class="k">未達標解雇風險</span><span class="${info.cls}">${info.risk}</span></div>
+      </div>
+      <div class="card"><h3>互動</h3>
+        <div class="quote">了解老闆的性格後，你打算短期就衝擊戰績，還是選擇慢慢培養年輕陣容？</div>
+      </div>`;
+  }else if(name==="roster"){
+    body.innerHTML=`<div class="placeholder">👥 2010 真實球員名單<br>下一步我會分批匯入這支球隊的完整 roster</div>`;
+  }else if(name==="salary"){
+    body.innerHTML=`<div class="placeholder">💰 薪資報表（工資帽 / 土豪線 / 特例）<br>隨名單資料一起匯入</div>`;
+  }else if(name==="picks"){
+    body.innerHTML=`<div class="placeholder">🎟️ 未來 4 年選秀權台帳（保護條款）<br>隨名單資料一起匯入</div>`;
+  }else{
+    body.innerHTML=`<div class="card"><h3>設定</h3>
+      <div class="row" onclick="buzz();if(confirm('確定重選球隊？')){localStorage.removeItem('gm_team');show('select');}" style="cursor:pointer"><span class="k">重新選擇球隊</span><b>›</b></div>
+      <div class="row"><span class="k">版本</span><b>v0.2 換隊按鈕</b></div>
+    </div>`;
+  }
+}
+renderTeams();
+const saved=localStorage.getItem("gm_team");
+if(saved && TEAMS.some(t=>t[0]===saved)){ pick(saved); }
+</script>
+</body>
+</html>
